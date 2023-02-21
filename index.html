@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+
+<title>Solis Current Calculator</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+  body {
+    background-color: powderblue;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: #101010;
+  }
+  h1 {
+    font-size: 24px;
+    color: navy;
+  }
+  h2 {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  #but1 {
+    border-radius: 12px;
+    height: 24px;
+    width:80px;
+    border: 3px solid firebrick;
+    background-color: peachpuff;
+    font-size:14px;
+    font-weight:bold;
+  }
+  #but2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: navy;
+    padding: 3px 20px;
+  }
+  #amps, #watts {
+    background-color:white;
+    width:100%;
+    height:100%;
+    color:navy;
+    font-size:20px;
+    font-weight: bold;
+    border:1px solid #111111;
+    padding:5px 30px;
+    display:none;
+  }
+  #notes {
+    margin-top:10px;
+    margin-left:50px;
+    float:left;
+    clear:left;
+    position:relative;
+    width:480px;
+    border:2px solid #111111;
+    padding:10px;
+  }
+</style>
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function(event)  {
+
+  if (localStorage.getItem("hrs") == null) {
+    localStorage.setItem("hrs",3);
+  }
+  document.getElementById("hrs").value = localStorage.getItem("hrs");
+  if (localStorage.getItem("mins") == null) {
+    localStorage.setItem("mins",50);
+  }
+  document.getElementById("mins").value = localStorage.getItem("mins");
+  if (localStorage.getItem("volts") == null) {
+    localStorage.setItem("volts",52);
+  }
+  document.getElementById("volts").value = localStorage.getItem("volts");
+  if (localStorage.getItem("kwh") == null) {
+    localStorage.setItem("kwh",10);
+  }
+  document.getElementById("kwh").value = localStorage.getItem("kwh");
+  document.getElementById("pct").focus();
+});
+
+function calculate() {
+  var ihrs = parseFloat(document.getElementById("hrs").value);
+  var imins = parseFloat(document.getElementById("mins").value);
+  var ivolts = parseFloat(document.getElementById("volts").value);
+  var ikwh = parseFloat(document.getElementById("kwh").value);
+  var ipct = parseFloat(document.getElementById("pct").value);
+  if (isNaN(ihrs) || isNaN(ivolts) || isNaN(ikwh) || isNaN(ipct)) {
+    alert("All fields are mandatory and must have a numeric value");
+  }
+  else {
+  localStorage.setItem("hrs",ihrs);
+  localStorage.setItem("mins",imins);
+  localStorage.setItem("volts",ivolts);
+  localStorage.setItem("kwh",ikwh);
+
+  tothrs = ihrs + (imins/60);
+  var kwhs = parseFloat(ikwh*ipct/100).toFixed(2);
+  var amps = parseFloat(kwhs / ivolts / tothrs * 1000).toFixed(1);
+  amps = amps + "&nbsp;&nbsp;Amps";
+  document.getElementById("watts").innerHTML = parseFloat(kwhs/tothrs).toFixed(2) + "&nbsp;&nbsp;kW";
+  document.getElementById("watts").style.display = "inline";
+  document.getElementById("amps").innerHTML = amps;
+  document.getElementById("amps").style.display = "inline";
+  }
+}
+function notes() {
+  if (document.getElementById("notes").style.display == "none") {
+    document.getElementById("notes").style.display = "inline";
+  }
+  else {
+    document.getElementById("notes").style.display = "none";
+  }
+}
+</script>
+</head>
+<body>
+<div style="margin-top:50px;margin-left:50px;float:left;position:relative;border:2px solid #111111;width:500px;padding-bottom:20px;">
+<table border="0" cellspacing="4" cellpadding="4" style="padding:0 20px;">
+<tbody>
+<tr>
+<td colspan="2" align="center"><h1>Charging Current Calculator</h1></td>
+</tr>
+<tr>
+<td width="50%" align="right">No of Hours at Cheap Rate</td>
+<td width="50%"><input name="hrs" id="hrs" size="2" type="text" pattern="\d*" maxlength="2"/> Hrs <input name="mins" id="mins" size="2" type="text" pattern="\d*" maxlength="2"/> Mins</td>
+</tr>
+<tr>
+<td width="50%" align="right">Average Battery Voltage</td>
+<td width="50%"><input name="volts" id="volts" size="3" type="number" /> V</td>
+</tr>
+<tr>
+<td width="50%" align="right">Total Battery Capacity</td>
+<td width="40%"><input name="kwh" id="kwh" size="3" type="number" /> kWh</td>
+</tr>
+<tr>
+<td width="50%" align="right">Desired % SOC increase</td>
+<td width="50%"><input name="pct" id="pct" size="3" type="number" /> %</td>
+</tr>
+<tr height="40">
+<td width="50%"> </td>
+<td width="50%"><button name="but2" id="but2" onclick="calculate()">Calculate</button></td>
+</tr>
+<tr height="40">
+<td width="50%" align="right">Required kW per hour:</td>
+<td width="50%"><div id="watts"></div></td>
+</tr>
+<tr>
+<td width="50%" align="right">Set Charging Current to:</td>
+<td width="50%"><div id="amps"></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div style="float:left;clear:left;margin-top:10px;margin-left:55px;"><button name="but1" id="but1" onclick="notes()">Notes</button></div>
+<div id="notes" style="display:none;">
+<p>This caclulator works out the Charging Current Limit that you should set in order to reach the desired increase in system % SOC over the full cheap rate electricity tarriff period.</p>
+<p>When opened for the first time a set of parameters based on a 10kWh Puredrive Purestorage system are displayed.&nbsp;&nbsp;These should be changed to reflect your own system and, once changed, will then default to those values each time the app is run.</p>
+<p>Once the correct figures have been stored, the only number that needs to be entered is the desired % SOC increase.&nbsp;&nbsp;On then pressing 'Calculate' the app will display the required kW per hour and the amp value to which the Charging Current Limit should be set to achieve that.</p>
+<p><b>No of Hours at Cheap Rate</b> - Is the total time in hours and minutes of the cheap rate tarriff.&nbsp;&nbsp;The actual hours of the cheap rate time should be set in the Inverter settings.</p>
+<p><b>Average Battery Voltage</b> - Is the average battery voltage during a charging session.&nbsp;&nbsp;If this is not known a suitable value can be found by going to 'Device' ==> 'Inverter' in the SolisCloud app and selecting 'Battery Voltage' in the Battery section of Parameters.</p>
+<p><b>Total Capacity</b> - Is the total kWh capacity of your system.</p>
+<p><b>Desired % SOC Increase</b> - Is the increase in % SOC that you wish to charge your batteries up to.</p>
+<p>Finally, clicking on the 'Notes' button again will hide these notes.</p>
+</div>
+</body>
+</html>
+
